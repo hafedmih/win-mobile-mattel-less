@@ -1,0 +1,170 @@
+<resources>
+    <plurals name="attempt_left_txt">
+        <item quantity="one">Attempt left : %d</item>
+        <item quantity="other">Attempts left : %d</item>
+    </plurals>
+    <string name="ACTION_USB_PERMISSION" translatable="false">com.famoco.kyctelcomr.USB_PERMISSION</string>
+    <string name="back">Back</string>
+    <string name="place_your_finger">Place your finger</string>
+    <string name="rest_your_finger_on_the_biometric_module">Rest your finger on the biometric module</string>
+    <string name="IMAGE_DESCRIPTION_FINGER" translatable="false">Image of the finger captured</string>
+
+    <string name="DEFAULT_SENSOR_MESSAGE" translatable="false">Put your finger on the device</string>
+    <string name="biometry_fragment_capture_fingerprint_before_next">Please capture your fingerprint before going on the next stage.</string>
+    <string name="error_dialog_title">Something went wrong</string>
+    <string name="error_dialog_morpho_content">An internal error happened during the enrolment. Please check the connection with the module and retry.\n\n(Error code : %d / %d)</string>
+    <string name="error_dialog_init_content">An internal issue has been raised by peripherals device during its initialization :\n\n %s</string>
+    <string name="dialog_retry_button">Retry</string>
+    <string name="feature_not_yet_implemented">Feature not yet implemented</string>
+    <string name="external_devices_deconnection">Your external devices have been disconnected</string>
+    <string name="sim_fragment_edit_text_error">Enter the SIM card phone number</string>
+    <string name="sim_fragment_snackbar_missing_phone_number">Please enter your phone number before going on the next stage.</string>
+    <string name="phone_fragment_snackbar_missing_info">Please enter missing info before going on the next stage.</string>
+    <string name="snartcard_fragment_snackbar_plug_card_before_next">Please plug the card and wait until the process is done before going on the next stage.</string>
+    <string name="invalid_card">Card is not valid</string>
+    <string name="smartcard_fragment_match_on_card_ok">The biometric match has been a success, you can now continue.</string>
+    <string name="smartcard_fragment_match_on_card_ko">The biometric match has failed.</string>
+    <string name="smartcard_fragment_idle_state">Please put the ID card in the reader to perform a fingerprint match on card</string>
+    <string name="smartcard_fragment_do_not_remove_card">Do not remove the card before the end of the process</string>
+    <string name="smartcard_fragment_match_on_card_pending">Identity retrieved.   Biometric match on card on going…</string>
+    <string name="dialog_ok_btn" translatable="false">OK</string>
+    <string name="splash_smartcard_init">Smart Card Reader module initialization…</string>
+    <string name="splash_morpho_init">Morpho module initialization…</string>
+    <string name="enroll_customer">Enroll customer</string>
+    <string name="registration_logs">Registration logs</string>
+    <string name="next_btn">Next</string>
+    <string name="card_number">Card Number</string>
+    <string name="personal_number">Personal Number</string>
+    <string name="first_name">First Name</string>
+    <string name="father_given_name">Father\'s given name</string>
+    <string name="last_name">Last Name</string>
+    <string name="sex">Sex</string>
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="place_of_birth">Place of birth</string>
+    <string name="date_of_expiry">Date of expiry</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="msisdn" translatable="false">MSISDN</string>
+    <string name="imsi" translatable="false">IMSI</string>
+
+    <!-- MORPHO ERROR CODES -->
+    <string name="end_btn">End</string>
+    <string name="EMPTY" translatable="false" />
+    <string name="MORPHO_OK" translatable="false">No error.</string>
+    <string name="MORPHOERR_INTERNAL" translatable="false">Biometrics device performed an internal error.</string>
+    <string name="MORPHOERR_PROTOCOLE" translatable="false">Communication protocol error.</string>
+    <string name="MORPHOERR_CONNECT" translatable="false">Can not connect biometrics device.</string>
+    <string name="MORPHOERR_CLOSE_COM" translatable="false">Error while closing communication port.</string>
+    <string name="MORPHOERR_BADPARAMETER" translatable="false">Invalid parameter.</string>
+    <string name="MORPHOERR_MEMORY_PC" translatable="false">Not enough memory (in the PC).</string>
+    <string name="MORPHOERR_MEMORY_DEVICE" translatable="false">Not enough memory for the creation of a database in the MSO.</string>
+    <string name="MORPHOERR_NO_HIT" translatable="false">Authentication or Identification failed.</string>
+    <string name="MORPHOERR_STATUS" translatable="false">MSO returned an unknown status error.</string>
+    <string name="MORPHOERR_DB_FULL" translatable="false">The database is full.</string>
+    <string name="MORPHOERR_DB_EMPTY" translatable="false">The database is empty.</string>
+    <string name="MORPHOERR_ALREADY_ENROLLED" translatable="false">User has already been enrolled.</string>
+    <string name="MORPHOERR_BASE_NOT_FOUND" translatable="false">The specified base does not exist.</string>
+    <string name="MORPHOERR_BASE_ALREADY_EXISTS" translatable="false">The specified base already exist.</string>
+    <string name="MORPHOERR_NO_ASSOCIATED_DB" translatable="false">User object has been instantiated without MorphoDatabase.getUser.</string>
+    <string name="MORPHOERR_NO_ASSOCIATED_DEVICE" translatable="false">Database object has been instantiated without MorphoDevice.getDatabase.</string>
+    <string name="MORPHOERR_INVALID_TEMPLATE" translatable="false">The template is not valid.</string>
+    <string name="MORPHOERR_NOT_IMPLEMENTED" translatable="false">Command not yet implemented in this release.</string>
+    <string name="MORPHOERR_TIMEOUT" translatable="false">No response after defined time.</string>
+    <string name="MORPHOERR_NO_REGISTERED_TEMPLATE" translatable="false">No templates have been registered.</string>
+    <string name="MORPHOERR_FIELD_NOT_FOUND" translatable="false">Field does not exist.</string>
+    <string name="MORPHOERR_CORRUPTED_CLASS" translatable="false">Class has been corrupted.</string>
+    <string name="MORPHOERR_TO_MANY_TEMPLATE" translatable="false">There are too many templates.</string>
+    <string name="MORPHOERR_TO_MANY_FIELD" translatable="false">There are too many fields.</string>
+    <string name="MORPHOERR_MIXED_TEMPLATE" translatable="false">Templates with different formats are mixed.</string>
+    <string name="MORPHOERR_CMDE_ABORTED" translatable="false">Command has been aborted.</string>
+    <string name="MORPHOERR_INVALID_PK_FORMAT" translatable="false">Invalid PK format.</string>
+    <string name="MORPHOERR_SAME_FINGER" translatable="false">User gave twice the same finger.</string>
+    <string name="MORPHOERR_OUT_OF_FIELD" translatable="false">The number of the additional field is more than 128.</string>
+    <string name="MORPHOERR_INVALID_USER_ID" translatable="false">UserID is not valid.</string>
+    <string name="MORPHOERR_INVALID_USER_DATA" translatable="false">The user data are not valid.</string>
+    <string name="MORPHOERR_FIELD_INVALID" translatable="false">Additional field name length is more than MORPHO_FIELD_NAME_LEN.</string>
+    <string name="MORPHOERR_USER_NOT_FOUND" translatable="false">User is not found.</string>
+    <string name="MORPHOERR_COM_NOT_OPEN" translatable="false">Serial COM has not been opened.</string>
+    <string name="MORPHOERR_ELT_ALREADY_PRESENT" translatable="false">This element is already present in the list.</string>
+    <string name="MORPHOERR_NOCALLTO_DBQUERRYFIRST" translatable="false">You have to call MorphoDatabase.dbQueryFirst to initialize the querry.</string>
+    <string name="MORPHOERR_USER" translatable="false">The communication callback functions returns error between -10000 and -10499.</string>
+    <string name="MORPHOERR_BAD_COMPRESSION" translatable="false">The Compression is not valid.</string>
+    <string name="MORPHOERR_SECU" translatable="false">Security error.</string>
+    <string name="MORPHOERR_CERTIF_UNKNOW" translatable="false">The MSO has not the certificate necessary to verify the signature.</string>
+    <string name="MORPHOERR_INVALID_CLASS" translatable="false">The class has been destroyed.</string>
+    <string name="MORPHOERR_USB_DEVICE_NAME_UNKNOWN" translatable="false">The specified Usb device is not plugged.</string>
+    <string name="MORPHOERR_CERTIF_INVALID" translatable="false">The certificate is not valid.</string>
+    <string name="MORPHOERR_SIGNER_ID" translatable="false">The certificate identity is not the same than the X984 certificate identity.</string>
+    <string name="MORPHOERR_SIGNER_ID_INVALID" translatable="false">The X984 certificate identity size is different to 20 octets (SHA_1 size).</string>
+    <string name="MORPHOERR_FFD" translatable="false">False Finger Detected.</string>
+    <string name="MORPHOERR_MOIST_FINGER" translatable="false">The finger can be too moist or the scanner is wet.</string>
+    <string name="MORPHOERR_NO_SERVER" translatable="false">The Morpho MorphoSmart Service Provider Usb Server is stopped or not installed.</string>
+    <string name="MORPHOERR_OTP_NOT_INITIALIZED" translatable="false">No parameter has been initialized.</string>
+    <string name="MORPHOERR_OTP_PIN_NEEDED" translatable="false">Code pin is needed : it is the first enrollment.</string>
+    <string name="MORPHOERR_OTP_REENROLL_NOT_ALLOWED" translatable="false">User is not allowed to be re enrolled.</string>
+    <string name="MORPHOERR_OTP_ENROLL_FAILED" translatable="false">Enrollment failed.</string>
+    <string name="MORPHOERR_OTP_IDENT_FAILED" translatable="false">Identification failed.</string>
+    <string name="MORPHOERR_NO_MORE_OTP" translatable="false">No more OTP available (sequence number = 0).</string>
+    <string name="MORPHOERR_OTP_NO_HIT" translatable="false">Authentication or Identification failed.</string>
+    <string name="MORPHOERR_OTP_ENROLL_NEEDED" translatable="false">Enrollment needed before generating OTP.</string>
+    <string name="MORPHOERR_DEVICE_LOCKED" translatable="false">The device is locked.</string>
+    <string name="MORPHOERR_DEVICE_NOT_LOCK" translatable="false">The device is not locked.</string>
+    <string name="MORPHOERR_OTP_LOCK_GEN_OTP" translatable="false">ILV_OTP_GENERATE Locked.</string>
+    <string name="MORPHOERR_OTP_LOCK_SET_PARAM" translatable="false">ILV_OTP_SET_PARAMETERS Locked.</string>
+    <string name="MORPHOERR_OTP_LOCK_ENROLL" translatable="false">ILV_OTP_ENROLL_USER Locked.</string>
+    <string name="MORPHOERR_FVP_MINUTIAE_SECURITY_MISMATCH" translatable="false">Security level mismatch: attempt to match fingerprint template in high security level (MorphoSmart FINGER VP only).</string>
+    <string name="MORPHOERR_FVP_FINGER_MISPLACED_OR_WITHDRAWN" translatable="false">Misplaced or withdrawn finger has been detected during acquisition (MorphoSmart FINGER VP only).</string>
+    <string name="MORPHOERR_LICENSE_MISSING" translatable="false">A required license is missing.</string>
+    <string name="MORPHOERR_CANT_GRAN_PERMISSION_USB" translatable="false">Could not grant permissions to USB</string>
+    <string name="morpho_instruction_0">No finger detected</string>
+    <string name="morpho_instruction_1">Move your finger up</string>
+    <string name="morpho_instruction_2">Move your finger down</string>
+    <string name="morpho_instruction_3">Move your finger left</string>
+    <string name="morpho_instruction_4">Move your finger right</string>
+    <string name="morpho_instruction_5">Press harder</string>
+    <string name="morpho_instruction_6">Move latent</string>
+    <string name="morpho_instruction_7">Remove your finger</string>
+    <string name="morpho_instruction_8">Fingerprint scanned successfully !</string>
+    <string name="splash_fragment_title">Welcome !</string>
+    <string name="home_fragment_title">Welcome !</string>
+    <string name="fingerprint_fragment_title">Fingerprint</string>
+    <string name="smartcard_fragment_title">Smartcard Reader</string>
+    <string name="sim_fragment_title">Sim card</string>
+    <string name="phone_fragment_title">Sim card Info</string>
+    <string name="summary_fragment_title">Congratulations !</string>
+    <string name="sim_fragment_main">Please enter the related SIM phone number :</string>
+    <string name="summary_fragment_main_text">The following customer has been registered :</string>
+    <string name="msisdn_instruction">Please enter the related MSISDN :</string>
+
+    <string name="imsi_instruction">Please enter the related IMSI :</string>
+    <string name="app_running_on_non_famoco_devices_dialog_content">The current application cannot be ran on a device that is not a Famoco device (or does not run with the Famoco Layer).</string>
+    <string name="app_running_on_non_famoco_devices_dialog_title">App running on non-Famoco device</string>
+    <string name="send_data_fragment_title">Sending data…</string>
+    <string name="send_data_text">Please wait until the client information has been sent...</string>
+    <string name="send_info_btn">Send info</string>
+    <string name="phone_number_format" translatable="false">+222 %s</string>
+    <string name="select_finger_txt">Finger saved on the card to match with :</string>
+    <string name="left_finger">Left</string>
+    <string name="right_finger">Right</string>
+    <string name="phone_number_error">The phone number have to be 11 number long</string>
+    <string name="msisdn_error">MSISDN have to be 10 number long</string>
+    <string name="imsi_number_error">IMSI have to be 9 number long</string>
+    <string name="sms" translatable="false">SMS</string>
+    <string name="ussd" translatable="false">USSD</string>
+    <string name="send_data_txt">Send</string>
+    <string name="web" translatable="false">Web</string>
+    <string name="send_data_through_ussd">Send data through USSD</string>
+    <string name="use_precreated_imsi">Use precreated IMSI</string>
+    <string name="send_ussd">Send USSD</string>
+
+    <string name="send_sms">Send SMS</string>
+    <string name="duplicated">Duplicated</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string-array name="options">
+        <item>IMSI pre-cree</item>
+        <item>IMSI </item>
+        <item>Modfification</item>
+        <item>Bon d\'echange</item>
+    </string-array>
+</resources>

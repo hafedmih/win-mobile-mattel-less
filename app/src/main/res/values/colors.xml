@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3A7472</color>
+    <color name="colorSecondary">#9CCF4E</color>
+    <color name="colorBackground">#EBF1F1</color>
+
+    <color name="success">#9CCF4E</color>
+
+    <!-- To be confirmed -->
+    <color name="colorError">#EB9C49</color>
+    <color name="colorError_bis">#D01818</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="gray">#FF808080</color>
+
+</resources>

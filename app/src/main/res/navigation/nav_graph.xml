@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.famoco.kyctelcomr.core.ui.fragments.SplashFragment"
+        android:label="@string/home_fragment_title"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splashFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.famoco.kyctelcomr.core.ui.fragments.HomeFragment"
+        android:label="@string/home_fragment_title"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_biometryFragment"
+            app:destination="@id/biometryFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_faceFragment2"
+            app:destination="@id/faceFragment2" />
+        <action
+            android:id="@+id/action_homeFragment_to_menuFragment"
+            app:destination="@id/menuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/biometryFragment"
+        android:name="com.famoco.kyctelcomr.core.ui.fragments.BiometryFragment"
+        android:label="@string/fingerprint_fragment_title"
+        tools:layout="@layout/fragment_biometry" >
+        <action
+            android:id="@+id/action_biometryFragment_to_smartCardFragment"
+            app:destination="@id/smartCardFragment"
+            app:popUpTo="@id/homeFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/smartCardFragment"
+        android:name="com.famoco.kyctelcomr.core.ui.fragments.SmartCardFragment"
+        android:label="@string/smartcard_fragment_title"
+        tools:layout="@layout/fragment_smart_card" >
+        <action
+            android:id="@+id/action_smartCardFragment_to_menuFragment"
+            app:destination="@id/menuFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/simFragment"
+        android:name="com.famoco.kyctelcomr.chinguitel.ui.fragments.SIMFragment"
+        android:label="@string/sim_fragment_title"
+        tools:layout="@layout/fragment_sim">
+        <action
+            android:id="@+id/action_simFragment_to_summaryFragment"
+            app:destination="@id/summaryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/phoneFragment"
+        android:name="com.famoco.kyctelcomr.mattel.ui.fragments.PhoneFragment"
+        android:label="@string/phone_fragment_title"
+        tools:layout="@layout/fragment_phone">
+        <action
+            android:id="@+id/action_phoneFragment_to_mattelSummaryFragment"
+            app:destination="@id/mattelSummaryFragment"
+            app:popUpTo="@id/homeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/summaryFragment"
+        android:name="com.famoco.kyctelcomr.chinguitel.ui.fragments.SummaryFragment"
+        android:label="@string/summary_fragment_title"
+        tools:layout="@layout/fragment_summary">
+        <action
+            android:id="@+id/action_summaryFragment_to_sendDataFragment"
+            app:destination="@id/sendDataFragment"
+            app:popUpTo="@id/homeFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/mattelSummaryFragment"
+        android:name="com.famoco.kyctelcomr.mattel.ui.fragments.MattelSummaryFragment"
+        android:label="@string/summary_fragment_title"
+        tools:layout="@layout/fragment_mattel_summary">
+    </fragment>
+    <fragment
+        android:id="@+id/sendDataFragment"
+        android:name="com.famoco.kyctelcomr.chinguitel.ui.fragments.SendDataFragment"
+        android:label="@string/send_data_fragment_title"
+        tools:layout="@layout/fragment_send_data"/>
+    <fragment
+        android:id="@+id/menuFragment"
+        android:name="com.famoco.kyctelcomr.mattel.ui.fragments.MenuFragment"
+        android:label="MenuFragment"
+        tools:layout="@layout/fragment_menu_list"
+        >
+        <action
+            android:id="@+id/action_menuFragment_to_phoneFragment"
+            app:destination="@id/phoneFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/faceFragment2"
+        android:name="com.famoco.kyctelcomr.core.ui.fragments.FaceFragment"
+        android:label="fragment_face"
+        tools:layout="@layout/fragment_face" >
+        <action
+            android:id="@+id/action_faceFragment2_to_smartCardFragment"
+            app:destination="@id/smartCardFragment" />
+    </fragment>
+</navigation>
