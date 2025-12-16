@@ -29,8 +29,8 @@ class UploadRepository @Inject constructor(
     companion object {
         private val TAG = UploadRepository::class.java.simpleName
 
-       private const val SMS_NUMBER_MATTEL ="1606" //"1607"
-     //  private const val SMS_NUMBER_MATTEL = "36606730"
+        private const val SMS_NUMBER_MATTEL ="1606" //"1607"
+        //  private const val SMS_NUMBER_MATTEL = "36606730"
 
         //private const val SMS_NUMBER = "153"
         private const val SMS_NUMBER = "128"
@@ -44,9 +44,9 @@ class UploadRepository @Inject constructor(
     private val _smsState = MutableLiveData<Pair<Boolean, String>?>().apply { value = null }
     val smsState: LiveData<Pair<Boolean, String>?> = _smsState
     fun updateLastKnownLocation(location: Location) {
-                this.lastKnownLocation = location
-              //  Log.d(TAG, "Updated lastKnownLocation in UploadRepository: $location")
-            }
+        this.lastKnownLocation = location
+        //  Log.d(TAG, "Updated lastKnownLocation in UploadRepository: $location")
+    }
     private val sendSMSBroadcastReceiver = object: BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
             when(resultCode) {
@@ -137,8 +137,10 @@ class UploadRepository @Inject constructor(
 
         //val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
         val optionStr = if(isFinger) "" else "0000"
-        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), 0)
-        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), 0)
+
+        // FIXED: Added FLAG_IMMUTABLE
+        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
 
         val ussdContent = "4${optionStr}*${msisdn}*${imsi}*${personalNumber}*${locationString}#"
         SmsManager.getDefault().sendTextMessage(SMS_NUMBER_MATTEL, null, ussdContent, sentPI2, deliveredPI2)
@@ -162,9 +164,10 @@ class UploadRepository @Inject constructor(
         val cardNumber = peripheralAccess.cardNumber.value
         val personalNumber = peripheralAccess.identity.value?.personalNumber
 
-        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), 0)
-        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), 0)
-        
+        // FIXED: Added FLAG_IMMUTABLE
+        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
+
         //Message to send : "$MDN*$MRT"
         val smsContent = "${phoneNumber}*${cardNumber}0${personalNumber}"
 
@@ -178,8 +181,9 @@ class UploadRepository @Inject constructor(
         val cardNumber = peripheralAccess.cardNumber.value
         val personalNumber = peripheralAccess.identity.value?.personalNumber
 
-        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), 0)
-        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), 0)
+        // FIXED: Added FLAG_IMMUTABLE
+        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
 
         //Message to send : "$MDN*$MRT"
         if(imsi.length >0){
@@ -188,16 +192,16 @@ class UploadRepository @Inject constructor(
             SmsManager.getDefault().sendTextMessage(SMS_NUMBER_2, null, smsContent, sentPI, deliveredPI)
 
         }
-          else{
-           // val activity = context as Activity
+        else{
+            // val activity = context as Activity
             // val imei:String? = getIMEI(activity)
-              //*1328579403*${imei}
+            //*1328579403*${imei}
             val smsContent = "${phoneNumber}*${cardNumber}0${personalNumber}*1328579403*355288103080737"
 
             Log.d(TAG, "sendSMS: content -> $smsContent")
 
             SmsManager.getDefault().sendTextMessage(SMS_NUMBER, null, smsContent, sentPI, deliveredPI)
-          }
+        }
     }
 
     fun sendSMSMattel(phoneNumberText: String, imsi: String,isFinger : Boolean) {
@@ -225,29 +229,30 @@ class UploadRepository @Inject constructor(
         db.addAbonne(nni.toString(), phoneNumber.toString())
 
         // Toast to message on the screen
-       // Toast.makeText(this, name + " added to database", Toast.LENGTH_LONG).show()
-                val locationString = lastKnownLocation?.let { "${it.latitude}*${it.longitude}" } ?: "0*0"
+        // Toast.makeText(this, name + " added to database", Toast.LENGTH_LONG).show()
+        val locationString = lastKnownLocation?.let { "${it.latitude}*${it.longitude}" } ?: "0*0"
 
 
         Log.d(TAG, "savedDb: content -> ${nni} tel ${phoneNumber} ")
 
-   //  val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
-       val optionStr = if(isFinger) "" else "0000"
+        //  val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
+        val optionStr = if(isFinger) "" else "0000"
 
         val lieu_naissance = CleanString(peripheralAccess.identity.value?.placeOfBirth.toString());
-          //yyyy-mm-dd
+        //yyyy-mm-dd
         val date_naiss =date_naissFull.takeLast(4)+"-"+getNumberMonth(date_naissFull.subSequence(4,8).toString().trim())+"-"+date_naissFull.subSequence(8,11).toString().trim()
 
         val localisation="0,0"
 
-        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), 0)
-        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), 0)
+        // FIXED: Added FLAG_IMMUTABLE
+        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
         var smsContent="";
         if(imsi.length >6)
             smsContent ="1${optionStr}*${phoneNumber}*${imsi}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}*${locationString}";  //*${id_appareil}
 
         else
-                      smsContent ="2${optionStr}*${phoneNumber}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}*${locationString}"; //*${id_appareil}
+            smsContent ="2${optionStr}*${phoneNumber}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}*${locationString}"; //*${id_appareil}
 
 
 
@@ -276,10 +281,10 @@ class UploadRepository @Inject constructor(
         val date_naiss =date_naissFull.takeLast(4)+"-"+getNumberMonth(date_naissFull.subSequence(4,8).toString().trim())+"-"+date_naissFull.subSequence(8,11).toString().trim()
 
 
-
-        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), 0)
-        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), 0)
-       // val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
+        // FIXED: Added FLAG_IMMUTABLE
+        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        // val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
         val optionStr = if(isFinger) "" else "0000"
 
         var smsContent="";
@@ -305,7 +310,7 @@ class UploadRepository @Inject constructor(
         //println(answer)
         val re = Regex("[^A-Za-z0-9|à|â|é|è|ê|ë|ï|î|ô|ù|û|ç|œ|æ|' ]")
         answer = re.replace(answer, "") // works
-         return answer.trim()
+        return answer.trim()
         //println(answer);
     }
     fun getNumberMonth(str:String):String{
@@ -333,8 +338,10 @@ class UploadRepository @Inject constructor(
     }
     fun sendOTP(phoneNumberText: String, otp: String) {
         val phoneNumber = phoneNumberText.replace(" ", "")
-        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), 0)
-        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), 0)
+
+        // FIXED: Added FLAG_IMMUTABLE
+        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
 
         val smsContent = "100*${phoneNumberText}*${otp}"
         SmsManager.getDefault().sendTextMessage(SMS_NUMBER_MATTEL, null, smsContent, sentPI, deliveredPI)

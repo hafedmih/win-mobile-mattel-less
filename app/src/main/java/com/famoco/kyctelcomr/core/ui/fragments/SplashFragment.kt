@@ -11,7 +11,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.famoco.famocodialog.DialogType
 import com.famoco.famocodialog.FamocoDialog
-import com.famoco.kyctelcomr.BuildConfig
 import com.famoco.kyctelcomr.R
 import com.famoco.kyctelcomr.databinding.FragmentSplashBinding
 import com.famoco.kyctelcomr.core.ui.viewmodels.SplashViewModel
@@ -86,9 +85,9 @@ class SplashFragment : Fragment(), FamocoListener {
     override fun onResume() {
         super.onResume()
         (activity as AppCompatActivity).supportActionBar?.hide()
-        if(BuildConfig.FLAVOR == "mauritel") {
-            binding.loadingTxt.setTextColor(resources.getColor(R.color.white, null))
-        }
+//        if(BuildConfig.FLAVOR == "mauritel") {
+//            binding.loadingTxt.setTextColor(resources.getColor(R.color.white, null))
+//        }
     }
 
     override fun onStop() {

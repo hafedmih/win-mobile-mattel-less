@@ -1,5 +1,7 @@
 package com.famoco.kyctelcomr.core.repositories
 
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.nfc.tech.IsoDep
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -12,6 +14,8 @@ import com.famoco.kyctelcomr.face.services.mtcnn.MTCNN
 import com.famoco.kyctelcomrtlib.PeripheralAccess
 import com.famoco.kyctelcomrtlib.smartcard.FingerEnum
 import com.morpho.morphosmart.sdk.TemplateList
+import fr.sabry.wsq.WSQDecoder
+import fr.sabry.wsq.WSQEncoder
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -81,7 +85,7 @@ class MainRepository @Inject constructor(
     fun askIdentity(isoDep: IsoDep) {
         peripheralAccess.askIdentity(isoDep)
     }
-
+//
     fun matchOnCardCurrentCustomer(isoDep: IsoDep,chosenFinger: FingerEnum) {
         customer.value?.templates?.getTemplate(0)?.data?.let{
             peripheralAccess.matchOnCard(isoDep,it, chosenFinger)
@@ -99,4 +103,40 @@ class MainRepository @Inject constructor(
 //        } ?: Log.w(TAG, "no biometric data catch from client => can't do match")
 
     }
+
+//    fun matchOnCardCurrentCustomer(isoDep: IsoDep, chosenFinger: FingerEnum) {
+//        customer.value?.templates?.getTemplate(0)?.data?.let { originalTemplateBytes ->
+//            try {
+//                // 1. Decode WSQ to Bitmap
+//                val morphoImageBitmap = WSQDecoder.decode(originalTemplateBytes).bitmap
+//
+//                // 2. Rotate Bitmap 180 degrees using Matrix
+//                val matrix = Matrix()
+//                matrix.postRotate(180f)
+//
+//                val rotateBitmap = Bitmap.createBitmap(
+//                    morphoImageBitmap,
+//                    0,
+//                    0,
+//                    morphoImageBitmap.width,
+//                    morphoImageBitmap.height,
+//                    matrix,
+//                    true
+//                )
+//
+//                // 3. Encode back to WSQ
+//                val rotatedWsqData: ByteArray = WSQEncoder(rotateBitmap)
+//                    .setBitrate(WSQEncoder.BITRATE_5_TO_1)
+//                    .encode()
+//
+//                // 4. Send to card
+//                peripheralAccess.matchOnCard(isoDep, rotatedWsqData, chosenFinger)
+//
+//            } catch (e: Exception) {
+//                Log.e(TAG, "Error rotating/matching fingerprint: ${e.message}")
+//            }
+//
+//        } ?: Log.w(TAG, "no biometric data catch from client => can't do match")
+//    }
+
 }

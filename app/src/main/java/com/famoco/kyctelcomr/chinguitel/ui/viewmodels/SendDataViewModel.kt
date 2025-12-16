@@ -73,6 +73,9 @@ class SendDataViewModel @Inject constructor(private val mainRepository: MainRepo
              //   val result = networkRepository.sendIdentity()
               //  Log.d(TAG, "sendData: ${result.toString()}")
             }
+            else -> {
+                Log.w(TAG, "SendData value is null or invalid")
+            }
         }
     }
     fun sendOTP(msisdn:String,otp:String){
