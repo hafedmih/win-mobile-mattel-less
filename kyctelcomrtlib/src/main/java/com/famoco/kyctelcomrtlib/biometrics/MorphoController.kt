@@ -179,11 +179,47 @@ class MorphoController(private val context: Context) : Observer {
             Log.d(TAG, "FP200 Configuration Applied.")
         }
     }
+    private fun applyOrientation180() {
+        val ORIENTATION_180 = 1
+
+        val currentOrientation = try {
+            morphoDevice
+                .getConfigParam(MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG)[0].toInt()
+        } catch (e: Exception) {
+            Log.e(TAG, "Cannot read orientation", e)
+            return
+        }
+
+        Log.d(TAG, "Sensor orientation current=$currentOrientation target=2")
+
+        if (currentOrientation != ORIENTATION_180) {
+            val ret = morphoDevice.setConfigParam(
+                MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG,
+                byteArrayOf(ORIENTATION_180.toByte())
+            )
+
+            if (ret == ErrorCodes.MORPHO_OK) {
+                Log.d(TAG, "Orientation set to 180°, rebooting sensor")
+                morphoDevice.rebootSoft(0, null)
+
+                if (isFP200()) {
+                    morphoDevice.openDeviceWithUart(UART_PORT, UART_SPEED)
+                } else {
+                    morphoDevice.openUsbDevice("0", 2000)
+                }
+            }
+        }
+    }
 
     fun morphoDeviceCapture() {
         _onCaptureCompleted.postValue(false)
+        val ORIENTATION_180 = 1
 
         val retOpen: Int = if (isFP200()) {
+            val ret = morphoDevice.setConfigParam(
+                MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG,
+                byteArrayOf(ORIENTATION_180.toByte())
+            )
             morphoDevice.openDeviceWithUart(UART_PORT, UART_SPEED)
         } else {
             morphoDevice.openUsbDevice(0.toString(), 2000)
@@ -191,6 +227,8 @@ class MorphoController(private val context: Context) : Observer {
 
         if (retOpen == ErrorCodes.MORPHO_OK) {
             // Apply config again just to be safe if connection was closed
+
+          //  applyOrientation180()
             if (isFP200()) initMorphoDeviceData()
 
             // ... Start Capture logic (Standard) ...
