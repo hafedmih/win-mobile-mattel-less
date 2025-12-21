@@ -24,4 +24,4 @@ dependencyResolutionManagement {
         }
     }
 }
-include ':app'
+include ':app',":kyctelcomrtlib"

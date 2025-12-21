@@ -2,6 +2,7 @@ package com.famoco.kyctelcomr.core.ui.viewmodels
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.nfc.tech.IsoDep
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -157,6 +158,19 @@ class MainViewModel @Inject constructor(
         lastProcessedIdentityNumber = currentIdentity.personalNumber
 
         mainRepository.matchOnCardCurrentCustomer(isoDep,_chosenFinger.value!!)
+    }
+    internal fun rotateBitmap180(original: Bitmap): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(180f)
+        return Bitmap.createBitmap(
+            original,
+            0,
+            0,
+            original.width,
+            original.height,
+            matrix,
+            true
+        )
     }
 
     fun notifyMatchResult(res: Boolean) {

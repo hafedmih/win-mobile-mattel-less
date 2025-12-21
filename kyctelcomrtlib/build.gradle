@@ -6,6 +6,7 @@ plugins {
 }
 
 android {
+    namespace="com.famoco.kyctelcomrtlib"
     compileSdk 31
 
     defaultConfig {

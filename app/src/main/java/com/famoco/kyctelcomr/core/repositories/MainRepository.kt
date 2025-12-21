@@ -111,19 +111,8 @@ class MainRepository @Inject constructor(
 //                val morphoImageBitmap = WSQDecoder.decode(originalTemplateBytes).bitmap
 //
 //                // 2. Rotate Bitmap 180 degrees using Matrix
-//                val matrix = Matrix()
-//                matrix.postRotate(180f)
 //
-//                val rotateBitmap = Bitmap.createBitmap(
-//                    morphoImageBitmap,
-//                    0,
-//                    0,
-//                    morphoImageBitmap.width,
-//                    morphoImageBitmap.height,
-//                    matrix,
-//                    true
-//                )
-//
+//                val rotateBitmap =rotateBitmap180(morphoImageBitmap)
 //                // 3. Encode back to WSQ
 //                val rotatedWsqData: ByteArray = WSQEncoder(rotateBitmap)
 //                    .setBitrate(WSQEncoder.BITRATE_5_TO_1)
@@ -138,5 +127,19 @@ class MainRepository @Inject constructor(
 //
 //        } ?: Log.w(TAG, "no biometric data catch from client => can't do match")
 //    }
+//
+    internal fun rotateBitmap180(original: Bitmap): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(180f)
+        return Bitmap.createBitmap(
+            original,
+            0,
+            0,
+            original.width,
+            original.height,
+            matrix,
+            true
+        )
+    }
 
 }
