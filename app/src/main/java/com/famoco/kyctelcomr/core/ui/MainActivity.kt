@@ -44,6 +44,7 @@ import com.famoco.kyctelcomr.mattel.model.DeviceLocation
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -174,8 +175,11 @@ class MainActivity : AppCompatActivity(), SMSListener {
           //  Log.w(TAG, "Location permission not granted. Cannot start location updates in onResume.")
             // Optionally, prompt the user again or explain why location is needed
         }
-    }
 
+    }
+    private fun isFP200(): Boolean {
+        return Build.MODEL.uppercase(Locale.ROOT).contains("FP200")
+    }
     private fun hasPhonePermission(): Boolean {
         return ContextCompat.checkSelfPermission(this,
             Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED
@@ -664,7 +668,7 @@ class MainActivity : AppCompatActivity(), SMSListener {
         DeviceLocation("PDV Toujounine Neyeb", 30497203L, "1I2Q", "18.080370", " -15.913141"),
         DeviceLocation("PDV carafou 24", 37476537L, "1XNM", "18.071217", "-15.936090"),
         DeviceLocation("PDV carafou 24", 37476511L, "1XR5", "18.071217", "-15.936090"),
-        DeviceLocation("PDV carafou 24", 37476511L, "1OJ5", "18.106663", "-15.966983"),
+   //     DeviceLocation("PDV carafou 24", 37476511L, "1OJ5", "18.106663", "-15.966983"),
 
         )
     }

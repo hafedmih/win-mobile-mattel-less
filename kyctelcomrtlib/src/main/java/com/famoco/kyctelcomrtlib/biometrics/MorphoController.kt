@@ -210,67 +210,99 @@ class MorphoController(private val context: Context) : Observer {
             }
         }
     }
-
+    private fun fixOrientation() {
+        val paramValue = byteArrayOf(0)
+        morphoDevice.setConfigParam(MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG, paramValue)
+        val orientation = 1
+        if(paramValue[0].toInt() != orientation) {
+            morphoDevice.setConfigParam(MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG, byteArrayOf(orientation.toByte()))
+            morphoDevice.rebootSoft(0, null)
+            morphoDevice.openUsbDevice(morphoDevice.getUsbDeviceName(0), 30)
+        }
+    }
     fun morphoDeviceCapture() {
         _onCaptureCompleted.postValue(false)
-        val ORIENTATION_180 = 1
+        val ORIENTATION_180 = 1 // Value 2 = 180° rotation
 
-        val retOpen: Int = if (isFP200()) {
-            val ret = morphoDevice.setConfigParam(
-                MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG,
-                byteArrayOf(ORIENTATION_180.toByte())
-            )
+        // 1. Initial attempt to open the device
+        var retOpen: Int = if (isFP200()) {
             morphoDevice.openDeviceWithUart(UART_PORT, UART_SPEED)
         } else {
             morphoDevice.openUsbDevice(0.toString(), 2000)
         }
 
         if (retOpen == ErrorCodes.MORPHO_OK) {
-            // Apply config again just to be safe if connection was closed
+            // 2. Check and Apply Orientation (Specific to FP200)
+            if (isFP200()) {
+                val currentOrientation: Int = try {
+                    val param = morphoDevice.getConfigParam(MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG)
+                    if (param != null && param.isNotEmpty()) param[0].toInt() else -1
+                } catch (e: Exception) {
+                    -1
+                }
 
-          //  applyOrientation180()
+                Log.d(TAG, "Current Orientation: $currentOrientation, Target: $ORIENTATION_180")
+
+                if (currentOrientation != ORIENTATION_180) {
+                    Log.i(TAG, "Orientation mismatch. Setting to 180° and rebooting...")
+
+                    // Set the parameter
+                    morphoDevice.setConfigParam(
+                        MorphoDevice.CONFIG_SENSOR_WIN_POSITION_TAG,
+                        byteArrayOf(ORIENTATION_180.toByte())
+                    )
+
+                    // Reboot is MANDATORY for orientation to take effect on hardware
+                    morphoDevice.rebootSoft(0, null)
+
+                    // Wait for the sensor to finish booting (Crucial for UART models)
+                    try { Thread.sleep(1500) } catch (e: Exception) {}
+
+                    // Re-open the device after reboot
+                    retOpen = morphoDevice.openDeviceWithUart(UART_PORT, UART_SPEED)
+                    Log.d(TAG, "Re-open after orientation switch result: $retOpen")
+                }
+            }
+        }
+
+        // 3. Check if we have a successful connection (either original or after reboot)
+        if (retOpen == ErrorCodes.MORPHO_OK) {
+
+            // Re-apply standard FP200 configurations (BPP and DR)
             if (isFP200()) initMorphoDeviceData()
 
-            // ... Start Capture logic (Standard) ...
             val processInfo = ProcessInfo.getInstance()
             val templateList = TemplateList()
 
-            // Use defaults or values from ProcessInfo
-            val timeout = processInfo.timeout
-            val acquisitionThreshold = 0
-            val advancedSecurityLevelsRequired = 0xFF
-            val callbackCmd = processInfo.callbackCmd
-            val coderChoice = processInfo.coder
-            val detectModeChoice = DetectionMode.MORPHO_ENROLL_DETECT_MODE.value
-
             val ret = morphoDevice.capture(
-                timeout,
-                acquisitionThreshold,
-                advancedSecurityLevelsRequired,
+                processInfo.timeout,
+                0,
+                0xFF,
                 NB_FINGER,
                 TEMPLATE_TYPE,
                 TEMPLATE_FVP_TYPE,
                 MAX_SIZE_TEMPLATE,
                 ENROLL_TYPE,
                 LATENT_DETECTION,
-                coderChoice,
-                detectModeChoice,
+                processInfo.coder,
+                DetectionMode.MORPHO_ENROLL_DETECT_MODE.value,
                 CompressionAlgorithm.MORPHO_NO_COMPRESS,
                 0,
                 templateList,
-                callbackCmd,
+                processInfo.callbackCmd,
                 this
             )
 
             val internalError = morphoDevice.internalError
 
-            // IMPORTANT: Close device after capture attempt
+            // Close device after capture
             stopCapture()
 
             if (ret == ErrorCodes.MORPHO_OK) {
                 _onCaptureCompleted.postValue(true)
                 _capturedTemplateList.postValue(templateList)
             } else {
+                Log.e(TAG, "Capture failed: $ret, Internal: $internalError")
                 _morphoInternalError.postValue(Pair(ret, internalError))
             }
 
