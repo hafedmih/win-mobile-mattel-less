@@ -142,7 +142,6 @@ class MainActivity : AppCompatActivity(), SMSListener {
             Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
             PendingIntent.FLAG_MUTABLE
         )
-        DeviceLocationManager.deleteLocation(applicationContext, "2140")
 //        mainViewModel.cardNumber.observe(this) { cardNumber ->
 //            if (cardNumber != null && pendingIsoDep != null) {
 //                // Call getIdentity only AFTER card number is received
@@ -421,7 +420,7 @@ class MainActivity : AppCompatActivity(), SMSListener {
 
             val distance = calculateDistanceInMeters(currentLat, currentLng, deviceLat, deviceLng)
 
-            if (distance > 100) {
+            if (distance > 250) {
                 val intent = Intent(context, DeviceNotAllowedActivity::class.java).apply {
                     putExtra("current_lat", currentLat)
                     putExtra("current_lng", currentLng)
