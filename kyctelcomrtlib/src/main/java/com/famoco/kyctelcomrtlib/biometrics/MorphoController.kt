@@ -20,8 +20,8 @@ class MorphoController(private val context: Context) : Observer {
     //   private const val UART_PORT = "/dev/ttyS1"
        //  private const val UART_PORT = "/dev/ttyS0"
 // private const val UART_PORT = "/dev/ttyS2"
- private const val UART_PORT = "/dev/ttyMT1"
-        private const val UART_SPEED = 57600
+ private const val UART_PORT = "ttyMT1"
+        private const val UART_SPEED =921600 // 115200 //57600
         //    private const val UART_SPEED = 115200
     }
 
