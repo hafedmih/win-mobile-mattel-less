@@ -10,7 +10,6 @@ import com.famoco.androidpcsclib.CardTerminal
 import com.famoco.androidpcsclib.CommandAPDU
 import com.famoco.androidpcsclib.PCSC
 import com.famoco.androidpcsclib.PCSC.PCSCCallbackInterface
-import com.famoco.kyctelcomrtlib.smartcard.APDUUtils.Companion.parseIdentityNewCard
 import kotlinx.coroutines.*
 import java.io.*
 import java.util.concurrent.Executors
@@ -249,9 +248,9 @@ class SmartCardController(context: Context) :
             return
         }
 
-//        val identity = if (newCard == true) APDUUtils.parseIdentityNewCard(data) else APDUUtils.parseIdentity(data)
+       val identity = if (newCard == true) APDUUtils.parseIdentityNewCard(data) else APDUUtils.parseIdentity(data)
         val (sw, rawIdentityData) = readIdentityFileInChunks(isoDep, 4636)
-        val identity = parseIdentityNewCard(rawIdentityData);
+     //   val identity = parseIdentityNewCard(rawIdentityData);
 
         Log.i(TAG, "personalNumber: ${identity.personalNumber}")
         Log.i(TAG, "firstnameLoc: ${identity.firstnameLoc}")
