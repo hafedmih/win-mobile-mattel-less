@@ -20,36 +20,59 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+enum class AppMode { MATTEL, FRANCHISE }
 
 @Singleton
 class UploadRepository @Inject constructor(
     @ApplicationContext val context: Context,
-    private val peripheralAccess: PeripheralAccess) {
+    private val peripheralAccess: PeripheralAccess
+) {
+
+    // Global variable to control the behavior
+    var currentMode: AppMode = AppMode.MATTEL
 
     companion object {
         private val TAG = UploadRepository::class.java.simpleName
 
-        private const val SMS_NUMBER_MATTEL ="1606" //"1607"
-        //  private const val SMS_NUMBER_MATTEL = "36606730"
+        private const val SMS_NUMBER_FRANCHISE = "1606"
+        private const val SMS_NUMBER_MATTEL = "1607"
 
-        //private const val SMS_NUMBER = "153"
-        private const val SMS_NUMBER = "128"
-        private const val SMS_NUMBER_2 = "1213"
+        private const val SMS_NUMBER_CLASSIC = "128"
+        private const val SMS_NUMBER_CLASSIC_2 = "1213"
 
         private const val SMS_SENT_ACTION = "SMS_SENT"
         private const val SMS_DELIVERED_ACTION = "SMS_DELIVERED"
     }
-    private var lastKnownLocation: Location? = null
 
+    /**
+     * Helper to get the correct SMS number based on current mode
+     */
+    private val activeSmsNumber: String
+        get() = if (currentMode == AppMode.MATTEL) SMS_NUMBER_MATTEL else SMS_NUMBER_FRANCHISE
+
+    /**
+     * Helper to get the location string part.
+     * If MATTEL: Returns empty string.
+     * If FRANCHISE: Returns "*lat*long" (or "*0*0" if no location available).
+     */
+    private val locationPart: String
+        get() = if (currentMode == AppMode.MATTEL) {
+            ""
+        } else {
+            lastKnownLocation?.let { "*${it.latitude}*${it.longitude}" } ?: "*0*0"
+        }
+
+    private var lastKnownLocation: Location? = null
     private val _smsState = MutableLiveData<Pair<Boolean, String>?>().apply { value = null }
     val smsState: LiveData<Pair<Boolean, String>?> = _smsState
+
     fun updateLastKnownLocation(location: Location) {
         this.lastKnownLocation = location
-        //  Log.d(TAG, "Updated lastKnownLocation in UploadRepository: $location")
     }
-    private val sendSMSBroadcastReceiver = object: BroadcastReceiver() {
+
+    private val sendSMSBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            when(resultCode) {
+            when (resultCode) {
                 Activity.RESULT_OK -> { _smsState.postValue(Pair(true, "SMS_SENT")) }
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE -> { _smsState.postValue(Pair(false, "RESULT_ERROR_GENERIC_FAILURE")) }
                 SmsManager.RESULT_ERROR_NO_SERVICE -> { _smsState.postValue(Pair(false, "RESULT_ERROR_NO_SERVICE")) }
@@ -59,9 +82,9 @@ class UploadRepository @Inject constructor(
         }
     }
 
-    private val deliverSMSBroadcastReceiver = object: BroadcastReceiver() {
+    private val deliverSMSBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            when(resultCode) {
+            when (resultCode) {
                 Activity.RESULT_OK -> { _smsState.postValue(Pair(true, "SMS_DELIVERED")) }
                 Activity.RESULT_CANCELED -> { _smsState.postValue(Pair(false, "RESULT_CANCELED")) }
             }
@@ -69,282 +92,178 @@ class UploadRepository @Inject constructor(
     }
 
     init {
-        context.registerReceiver(sendSMSBroadcastReceiver, IntentFilter(SMS_SENT_ACTION));
-        context.registerReceiver(deliverSMSBroadcastReceiver, IntentFilter(SMS_DELIVERED_ACTION));
+        context.registerReceiver(sendSMSBroadcastReceiver, IntentFilter(SMS_SENT_ACTION))
+        context.registerReceiver(deliverSMSBroadcastReceiver, IntentFilter(SMS_DELIVERED_ACTION))
     }
 
     fun clear() {
         _smsState.postValue(null)
     }
 
-    // MDN -> Phone number added in the application on SIMFragment level
-    // MRT -> CardNumber + 0 + PersonalNumber get from the identity object (populated in SmartCardFragment)
-    fun sendUSSD(phoneNumberText: String) {
-        val phoneNumber = phoneNumberText.replace(" ", "")
+    // --- MATTEL / FRANCHISE METHODS ---
 
-        val cardNumber = peripheralAccess.cardNumber.value
-        val personalNumber = peripheralAccess.identity.value?.personalNumber
-
-        //USSD content : "*128*MDN*MRT#"
-        val ussdContent = "*128*${phoneNumber}*${cardNumber}0${personalNumber}#"
-        Log.d(TAG, "sendUSSD: content -> $ussdContent")
-
-        val mmi = Uri.Builder()
-        mmi.scheme("tel")
-        mmi.opaquePart(ussdContent)
-
-        val intent = Intent(Intent.ACTION_CALL, mmi.build())
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
-    }
-
-    // MSISDN -> Unique Id for phone communication (Phone Number)
-    // IMSI -> SIM Unique Id
-    fun sendUSSD(msisdnText: String, imsi: String, kind: USSDKind) {
+    fun sendUSSDMattel(msisdnText: String, imsi: String, isFinger: Boolean) {
         val msisdn = msisdnText.replace(" ", "")
-
-        val cardNumber = peripheralAccess.cardNumber.value
         val personalNumber = peripheralAccess.identity.value?.personalNumber
+        val optionStr = if (isFinger) "" else "0000"
 
-        val locationString = lastKnownLocation?.let { "${it.latitude}*${it.longitude}" } ?: "0*0"
-
-        val ussdContent = when (kind) {
-
-
-            //USSD content : "153*1*MSISDN*IMSI*MRT#"
-            USSDKind.CLASSIC -> "*153*1*${msisdn}*${imsi}*${cardNumber}0${personalNumber}*${locationString}#"
-            //USSD content : "153*2*MSISDN*codeMRT#"
-            else -> "*153*2*${msisdn}*${cardNumber}0${personalNumber}*${locationString}#"
-        }
-
-        Log.d(TAG, "sendUSSD: content -> $ussdContent")
-
-        val mmi = Uri.Builder()
-        mmi.scheme("tel")
-        mmi.opaquePart(ussdContent)
-
-        val intent = Intent(Intent.ACTION_CALL, mmi.build())
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(intent)
-    }
-    fun sendUSSDMattel(msisdnText: String, imsi: String,isFinger:Boolean) {
-        val msisdn = msisdnText.replace(" ", "")
-
-        //val cardNumber = peripheralAccess.cardNumber.value
-        val personalNumber = peripheralAccess.identity.value?.personalNumber
-        val locationString = lastKnownLocation?.let { "${it.latitude}*${it.longitude}" } ?: "0*0"
-
-
-        //val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
-        val optionStr = if(isFinger) "" else "0000"
-
-        // FIXED: Added FLAG_IMMUTABLE
         val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
         val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
 
-        val ussdContent = "4${optionStr}*${msisdn}*${imsi}*${personalNumber}*${locationString}#"
-        SmsManager.getDefault().sendTextMessage(SMS_NUMBER_MATTEL, null, ussdContent, sentPI2, deliveredPI2)
+        // ussdContent: uses activeSmsNumber and appends locationPart only if not Mattel
+        val ussdContent = "*152*4${optionStr}*${msisdn}*${imsi}*${personalNumber}${locationPart}#"
 
-        //        Log.d(TAG, "sendUSSD: content -> $ussdContent")
-//
-//        val mmi = Uri.Builder()
-//        mmi.scheme("tel")
-//        mmi.opaquePart(ussdContent)
-//
-//        val intent = Intent(Intent.ACTION_CALL, mmi.build())
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//        context.startActivity(intent)
+        Log.d(TAG, "sendUSSDMattel (Mode: $currentMode): $ussdContent to $activeSmsNumber")
+       // SmsManager.getDefault().sendTextMessage(activeSmsNumber, null, ussdContent, sentPI2, deliveredPI2)
+        val mmi = Uri.Builder()
+        mmi.scheme("tel")
+        mmi.opaquePart(ussdContent)
+
+        val intent = Intent(Intent.ACTION_CALL, mmi.build())
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
     }
 
-    // MDN -> Phone number added in the application on SIMFragment level
-    // MRT -> CardNumber + 0 + PersonalNumber get from the identity object (populated in SmartCardFragment)
-    fun sendSMS(phoneNumberText: String) {
+    fun sendSMSMattel(phoneNumberText: String, imsi: String, isFinger: Boolean) {
         val phoneNumber = phoneNumberText.replace(" ", "")
+        val nni = peripheralAccess.identity.value?.personalNumber
+        val nom = CleanString(peripheralAccess.identity.value?.firstName.toString())
+        val prenom = CleanString(peripheralAccess.identity.value?.lastName.toString())
+        val sexeFull = CleanString(peripheralAccess.identity.value?.sex.toString())
+        val sexe = if (sexeFull.isNotEmpty()) sexeFull.take(1).uppercase() else ""
+        val date_naissFull = CleanString(peripheralAccess.identity.value?.dateOfBirth.toString())
+        val lieu_naissance = CleanString(peripheralAccess.identity.value?.placeOfBirth.toString())
 
-        val cardNumber = peripheralAccess.cardNumber.value
-        val personalNumber = peripheralAccess.identity.value?.personalNumber
+        // yyyy-mm-dd format
+        val date_naiss = if (date_naissFull.length >= 11) {
+            date_naissFull.takeLast(4) + "-" + getNumberMonth(date_naissFull.subSequence(4, 8).toString().trim()) + "-" + date_naissFull.subSequence(8, 11).toString().trim()
+        } else ""
 
-        // FIXED: Added FLAG_IMMUTABLE
-        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
-        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
-
-        //Message to send : "$MDN*$MRT"
-        val smsContent = "${phoneNumber}*${cardNumber}0${personalNumber}"
-
-        Log.d(TAG, "sendSMS: content -> $smsContent")
-
-        SmsManager.getDefault().sendTextMessage(SMS_NUMBER, null, smsContent, sentPI, deliveredPI)
-    }
-    fun sendSMS(phoneNumberText: String, imsi: String) {
-        val phoneNumber = phoneNumberText.replace(" ", "")
-
-        val cardNumber = peripheralAccess.cardNumber.value
-        val personalNumber = peripheralAccess.identity.value?.personalNumber
-
-        // FIXED: Added FLAG_IMMUTABLE
-        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
-        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
-
-        //Message to send : "$MDN*$MRT"
-        if(imsi.length >0){
-            val smsContent = "*0000*${phoneNumber}*${imsi}*${cardNumber}0${personalNumber}#"
-            Log.d(TAG, "sendSMS: content -> $smsContent")
-            SmsManager.getDefault().sendTextMessage(SMS_NUMBER_2, null, smsContent, sentPI, deliveredPI)
-
-        }
-        else{
-            // val activity = context as Activity
-            // val imei:String? = getIMEI(activity)
-            //*1328579403*${imei}
-            val smsContent = "${phoneNumber}*${cardNumber}0${personalNumber}*1328579403*355288103080737"
-
-            Log.d(TAG, "sendSMS: content -> $smsContent")
-
-            SmsManager.getDefault().sendTextMessage(SMS_NUMBER, null, smsContent, sentPI, deliveredPI)
-        }
-    }
-
-    fun sendSMSMattel(phoneNumberText: String, imsi: String,isFinger : Boolean) {
-        val phoneNumber = phoneNumberText.replace(" ", "")
-
-        val nni = peripheralAccess.identity.value?.personalNumber;
-        val cardNumber = peripheralAccess.cardNumber.value
-        val nom = CleanString(peripheralAccess.identity.value?.firstName.toString());
-        val prenom =CleanString(peripheralAccess.identity.value?.lastName.toString());
-
-        val sexeFull = CleanString(peripheralAccess.identity.value?.sex.toString());
-        val sexe = sexeFull.subSequence(0,1).toString().uppercase();
-
-        val date_naissFull = CleanString(peripheralAccess.identity.value?.dateOfBirth.toString());
-        //Log.d(TAG, "sendSMS: content -> dd"+date_naiss.subSequence(8,2))
-        //Log.d(TAG, "sendSMS: content -> dd"+date_naiss.subSequence(5,3))
-        //Log.d(TAG, "sendSMS: content -> yyyy"+date_naiss.takeLast(4))
         val db = DBHelper(context, null)
+        db.addAbonne(nni.toString(), phoneNumber)
 
-        // creating variables for values
-        // in name and age edit texts
-
-        // calling method to add
-        // name to our database
-        db.addAbonne(nni.toString(), phoneNumber.toString())
-
-        // Toast to message on the screen
-        // Toast.makeText(this, name + " added to database", Toast.LENGTH_LONG).show()
-        val locationString = lastKnownLocation?.let { "${it.latitude}*${it.longitude}" } ?: "0*0"
-
-
-        Log.d(TAG, "savedDb: content -> ${nni} tel ${phoneNumber} ")
-
-        //  val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
-        val optionStr = if(isFinger) "" else "0000"
-
-        val lieu_naissance = CleanString(peripheralAccess.identity.value?.placeOfBirth.toString());
-        //yyyy-mm-dd
-        val date_naiss =date_naissFull.takeLast(4)+"-"+getNumberMonth(date_naissFull.subSequence(4,8).toString().trim())+"-"+date_naissFull.subSequence(8,11).toString().trim()
-
-        val localisation="0,0"
-
-        // FIXED: Added FLAG_IMMUTABLE
+        val optionStr = if (isFinger) "" else "0000"
         val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
         val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
-        var smsContent="";
-        if(imsi.length >6)
-            smsContent ="1${optionStr}*${phoneNumber}*${imsi}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}*${locationString}";  //*${id_appareil}
 
-        else
-            smsContent ="2${optionStr}*${phoneNumber}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}*${locationString}"; //*${id_appareil}
-
-
-
-
-        Log.d(TAG, "sendSMS: content -> $smsContent")
-
-
-        SmsManager.getDefault().sendTextMessage(SMS_NUMBER_MATTEL, null, smsContent, sentPI2, deliveredPI2)
-    }
-
-    fun sendModificationMattel(phoneNumberText: String,isFinger:Boolean) {
-        val phoneNumber = phoneNumberText.replace(" ", "")
-
-        val locationString = lastKnownLocation?.let { "${it.latitude}*${it.longitude}" } ?: "0*0"
-        val nni = peripheralAccess.identity.value?.personalNumber;
-        val cardNumber = peripheralAccess.cardNumber.value
-        val nom = CleanString(peripheralAccess.identity.value?.firstName.toString());
-        val prenom =CleanString(peripheralAccess.identity.value?.lastName.toString());
-
-        val sexeFull = CleanString(peripheralAccess.identity.value?.sex.toString());
-        val sexe = sexeFull.subSequence(0,1).toString().uppercase();
-
-        val date_naissFull = CleanString(peripheralAccess.identity.value?.dateOfBirth.toString());
-        val lieu_naissance = CleanString(peripheralAccess.identity.value?.placeOfBirth.toString());
-        //yyyy-mm-dd
-        val date_naiss =date_naissFull.takeLast(4)+"-"+getNumberMonth(date_naissFull.subSequence(4,8).toString().trim())+"-"+date_naissFull.subSequence(8,11).toString().trim()
-
-
-        // FIXED: Added FLAG_IMMUTABLE
-        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
-        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
-        // val nbr =  peripheralAccess.capturedTemplateList.value?.nbTemplate
-        val optionStr = if(isFinger) "" else "0000"
-
-        var smsContent="";
-        //3*msisdn*mrz
-        smsContent ="3${optionStr}*${phoneNumber}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}*${locationString}"; //*${id_appareil}
-
-
-
-
-
-
-        Log.d(TAG, "sendSMS: content -> $smsContent")
-
-
-        SmsManager.getDefault().sendTextMessage(SMS_NUMBER_MATTEL, null, smsContent, sentPI2, deliveredPI2)
-    }
-
-    fun  CleanString(str:String):String{
-        var answer = str
-        //println(answer)
-        //à|â|é|è|ê|ë|ï|î|ô|ù|û|ç|œ|æ|'
-        answer = answer.replace("[^A-Za-z0-9|à|â|é|è|ê|ë|ï|î|ô|ù|û|ç|œ|æ|' ]", "") // doesn't work
-        //println(answer)
-        val re = Regex("[^A-Za-z0-9|à|â|é|è|ê|ë|ï|î|ô|ù|û|ç|œ|æ|' ]")
-        answer = re.replace(answer, "") // works
-        return answer.trim()
-        //println(answer);
-    }
-    fun getNumberMonth(str:String):String{
-        when (str) {
-            "Jan" -> return "01"
-            "Feb" -> return "02"
-            "Mar" -> return "03"
-            "Apr" -> return "04"
-            "May" -> return "05"
-            "Jun" -> return "06"
-            "Jul" -> return "07"
-            "Aug" -> return "08"
-            "Sep" -> return "09"
-            "Oct" -> return "10"
-            "Nov" -> return "11"
-            "Dec" -> return "12"
-
+        val smsContent = if (imsi.length > 6) {
+            "1${optionStr}*${phoneNumber}*${imsi}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}${locationPart}"
+        } else {
+            "2${optionStr}*${phoneNumber}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}${locationPart}"
         }
-        return ""
+
+        Log.d(TAG, "sendSMSMattel (Mode: $currentMode): $smsContent to $activeSmsNumber")
+        SmsManager.getDefault().sendTextMessage(activeSmsNumber, null, smsContent, sentPI2, deliveredPI2)
     }
-    fun getIMEI(activity: Activity): String? {
-        val telephonyManager = activity
-            .getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        return telephonyManager.deviceId
+
+    fun sendModificationMattel(phoneNumberText: String, isFinger: Boolean) {
+        val phoneNumber = phoneNumberText.replace(" ", "")
+        val nni = peripheralAccess.identity.value?.personalNumber
+        val nom = CleanString(peripheralAccess.identity.value?.firstName.toString())
+        val prenom = CleanString(peripheralAccess.identity.value?.lastName.toString())
+        val sexeFull = CleanString(peripheralAccess.identity.value?.sex.toString())
+        val sexe = if (sexeFull.isNotEmpty()) sexeFull.take(1).uppercase() else ""
+        val date_naissFull = CleanString(peripheralAccess.identity.value?.dateOfBirth.toString())
+        val lieu_naissance = CleanString(peripheralAccess.identity.value?.placeOfBirth.toString())
+
+        val date_naiss = if (date_naissFull.length >= 11) {
+            date_naissFull.takeLast(4) + "-" + getNumberMonth(date_naissFull.subSequence(4, 8).toString().trim()) + "-" + date_naissFull.subSequence(8, 11).toString().trim()
+        } else ""
+
+        val optionStr = if (isFinger) "" else "0000"
+        val sentPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI2 = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
+
+        val smsContent = "3${optionStr}*${phoneNumber}*${nni}*${nom}*${prenom}*${date_naiss}*${lieu_naissance}*${sexe}${locationPart}"
+
+        Log.d(TAG, "sendModificationMattel (Mode: $currentMode): $smsContent to $activeSmsNumber")
+        SmsManager.getDefault().sendTextMessage(activeSmsNumber, null, smsContent, sentPI2, deliveredPI2)
     }
+
     fun sendOTP(phoneNumberText: String, otp: String) {
         val phoneNumber = phoneNumberText.replace(" ", "")
-
-        // FIXED: Added FLAG_IMMUTABLE
         val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
         val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
 
-        val smsContent = "100*${phoneNumberText}*${otp}"
-        SmsManager.getDefault().sendTextMessage(SMS_NUMBER_MATTEL, null, smsContent, sentPI, deliveredPI)
+        val smsContent = "100*${phoneNumber}*${otp}"
+        SmsManager.getDefault().sendTextMessage(activeSmsNumber, null, smsContent, sentPI, deliveredPI)
+    }
 
+    // --- CLASSIC METHODS (CHINGUITEL / OTHER) ---
+
+    fun sendUSSD(phoneNumberText: String) {
+        val phoneNumber = phoneNumberText.replace(" ", "")
+        val cardNumber = peripheralAccess.cardNumber.value
+        val personalNumber = peripheralAccess.identity.value?.personalNumber
+
+        val ussdContent = "*128*${phoneNumber}*${cardNumber}0${personalNumber}#"
+        val mmi = Uri.Builder().scheme("tel").opaquePart(ussdContent).build()
+
+        context.startActivity(Intent(Intent.ACTION_CALL, mmi).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+
+    fun sendUSSD(msisdnText: String, imsi: String, kind: USSDKind) {
+        val msisdn = msisdnText.replace(" ", "")
+        val cardNumber = peripheralAccess.cardNumber.value
+        val personalNumber = peripheralAccess.identity.value?.personalNumber
+        val locationStr = lastKnownLocation?.let { "${it.latitude}*${it.longitude}" } ?: "0*0"
+
+        val ussdContent = when (kind) {
+            USSDKind.CLASSIC -> "*153*1*${msisdn}*${imsi}*${cardNumber}0${personalNumber}*${locationStr}#"
+            else -> "*153*2*${msisdn}*${cardNumber}0${personalNumber}*${locationStr}#"
+        }
+
+        val mmi = Uri.Builder().scheme("tel").opaquePart(ussdContent).build()
+        context.startActivity(Intent(Intent.ACTION_CALL, mmi).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+
+    fun sendSMS(phoneNumberText: String) {
+        val phoneNumber = phoneNumberText.replace(" ", "")
+        val cardNumber = peripheralAccess.cardNumber.value
+        val personalNumber = peripheralAccess.identity.value?.personalNumber
+
+        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
+
+        val smsContent = "${phoneNumber}*${cardNumber}0${personalNumber}"
+        SmsManager.getDefault().sendTextMessage(SMS_NUMBER_CLASSIC, null, smsContent, sentPI, deliveredPI)
+    }
+
+    fun sendSMS(phoneNumberText: String, imsi: String) {
+        val phoneNumber = phoneNumberText.replace(" ", "")
+        val cardNumber = peripheralAccess.cardNumber.value
+        val personalNumber = peripheralAccess.identity.value?.personalNumber
+
+        val sentPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_SENT_ACTION), PendingIntent.FLAG_IMMUTABLE)
+        val deliveredPI = PendingIntent.getBroadcast(context, 0, Intent(SMS_DELIVERED_ACTION), PendingIntent.FLAG_IMMUTABLE)
+
+        if (imsi.isNotEmpty()) {
+            val smsContent = "*0000*${phoneNumber}*${imsi}*${cardNumber}0${personalNumber}#"
+            SmsManager.getDefault().sendTextMessage(SMS_NUMBER_CLASSIC_2, null, smsContent, sentPI, deliveredPI)
+        } else {
+            val smsContent = "${phoneNumber}*${cardNumber}0${personalNumber}*1328579403*355288103080737"
+            SmsManager.getDefault().sendTextMessage(SMS_NUMBER_CLASSIC, null, smsContent, sentPI, deliveredPI)
+        }
+    }
+
+    // --- UTILS ---
+
+    fun CleanString(str: String): String {
+        val re = Regex("[^A-Za-z0-9|à|â|é|è|ê|ë|ï|î|ô|ù|û|ç|œ|æ|' ]")
+        return re.replace(str, "").trim()
+    }
+
+    fun getNumberMonth(str: String): String {
+        return when (str) {
+            "Jan" -> "01" "Feb" -> "02" "Mar" -> "03" "Apr" -> "04"
+            "May" -> "05" "Jun" -> "06" "Jul" -> "07" "Aug" -> "08"
+            "Sep" -> "09" "Oct" -> "10" "Nov" -> "11" "Dec" -> "12"
+            else -> ""
+        }
+    }
+
+    fun getIMEI(activity: Activity): String? {
+        val telephonyManager = activity.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        return try { telephonyManager.deviceId } catch (e: Exception) { null }
     }
 }

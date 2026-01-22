@@ -1,6 +1,7 @@
 package com.famoco.kyctelcomr.core.utils
 
 import android.content.Context
+import android.util.Log
 import com.famoco.kyctelcomr.R
 import com.morpho.morphosmart.sdk.ErrorCodes
 import java.text.SimpleDateFormat
@@ -112,4 +113,32 @@ fun Int.toInternalErrorMessage(): Int {
         ErrorCodes.MORPHOERR_CANT_GRAN_PERMISSION_USB -> R.string.MORPHOERR_CANT_GRAN_PERMISSION_USB
         else -> R.string.EMPTY
     }
+}
+fun String?.toSafeDouble(): Double {
+    if (this.isNullOrBlank()) return 0.0
+
+    // Remove any spaces or special characters
+    val cleanString = this.trim().replace(" ", "")
+
+    // If the string has multiple dots/commas, we need to decide which one is the decimal.
+    // Usually, in location data, we just want the first dot and to remove others,
+    // OR it's a European format where the last separator is the decimal.
+
+    // Logic: Replace comma with dot, then check if it's valid.
+    val formatted = cleanString.replace(",", ".")
+
+    val result = formatted.toDoubleOrNull()
+
+    if (result == null) {
+        Log.e("DEBUG_LOC", "CRITICAL: Could not parse coordinate string: '$this'")
+        // If it still fails, it might be the "18.094.204" format.
+        // We can try to keep only the first dot.
+        val parts = formatted.split(".")
+        if (parts.size > 2) {
+            val fixedString = parts[0] + "." + parts.subList(1, parts.size).joinToString("")
+            return fixedString.toDoubleOrNull() ?: 0.0
+        }
+    }
+
+    return result ?: 0.0
 }

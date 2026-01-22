@@ -49,14 +49,17 @@ class SplashFragment : Fragment(), FamocoListener {
 
        // detachSnackbar = Snackbar.make(binding.root, getString(R.string.external_devices_deconnection), Snackbar.LENGTH_INDEFINITE)
 
-//        splashViewModel.initStateLiveData.observe(viewLifecycleOwner) {
-//            // Do something only when both values are set to true
-//            if (it) {
-//                Log.i(TAG, "peripherals ready => go to home fragment")
-//                findNavController().navigate(SplashFragmentDirections.actionSplashFragmentToHomeFragment())
-//            }
-//        }
-        findNavController().navigate(SplashFragmentDirections.actionSplashFragmentToHomeFragment())
+        splashViewModel.initStateLiveData.observe(viewLifecycleOwner) { ready ->
+            // CRASH FIX: Check if we are still on the SplashFragment before navigating
+            if (ready) {
+                val navController = findNavController()
+                if (navController.currentDestination?.id == R.id.splashFragment) {
+                    Log.i(TAG, "peripherals ready => go to home fragment")
+                    navController.navigate(SplashFragmentDirections.actionSplashFragmentToHomeFragment())
+                }
+            }
+        }
+      //  findNavController().navigate(SplashFragmentDirections.actionSplashFragmentToHomeFragment())
 
         splashViewModel.loadingTxt.observe(viewLifecycleOwner) {
             binding.loadingTxt.text = it

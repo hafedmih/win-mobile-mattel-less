@@ -58,11 +58,17 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly files('libs/androidpcsclib-release-v1.3.3.aar')
-    compileOnly files('libs/fingerprintutilslib-release.aar')
-    compileOnly files('libs/jp2-android.aar')
+//    implementation fileTree(dir: 'libs', include: ['*.jar'])
+//    compileOnly files('libs/androidpcsclib-release-v1.3.3.aar')
+//    compileOnly files('libs/fingerprintutilslib-release.aar')
+//    compileOnly files('libs/jp2-android.aar')
 
+    api fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+
+    // 2. Or if you want to name them specifically:
+    api files('libs/androidpcsclib-release-v1.3.3.aar')
+    api files('libs/fingerprintutilslib-release.aar')
+    api files('libs/jp2-android.aar')
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'

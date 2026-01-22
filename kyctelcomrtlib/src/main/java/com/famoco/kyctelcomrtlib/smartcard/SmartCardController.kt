@@ -68,7 +68,7 @@ class SmartCardController(context: Context) :
 
     private val _attemptLeft = MutableLiveData<Int?>().apply { value = null }
     val attemptLeft: LiveData<Int?> = _attemptLeft
-
+    var skipMoCVerification: Boolean = true
     /*------------------------------------------------------*/
 
     fun init() {
@@ -272,6 +272,12 @@ class SmartCardController(context: Context) :
     private suspend fun askBiometryInternal(isoDep: IsoDep,template: ByteArray, chosenFinger: FingerEnum) {
 
 
+        if (skipMoCVerification) {
+            Log.i(TAG, "MoC: Skipping verification command (Testing mode)")
+            _attemptLeft.postValue(15) // Mock attempts
+            _matchLiveData.postValue(true) // Mock success
+            return
+        }
 
         var command =
             APDUUtils.formatSelectAidApdu(HexUtils.hexStringToByteArray(APDUUtils.AID_BIOMETRY))

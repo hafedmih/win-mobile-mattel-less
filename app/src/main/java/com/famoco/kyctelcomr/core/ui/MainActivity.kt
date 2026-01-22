@@ -39,6 +39,7 @@ import com.famoco.kyctelcomr.core.ui.viewmodels.MainViewModel
 import com.famoco.kyctelcomr.core.utils.DeviceLocationManager
 import com.famoco.kyctelcomr.core.utils.SMSListener
 import com.famoco.kyctelcomr.core.utils.SMSReceiver
+import com.famoco.kyctelcomr.core.utils.toSafeDouble
 import com.famoco.kyctelcomr.databinding.ActivityMainBinding
 import com.famoco.kyctelcomr.mattel.model.DeviceLocation
 // import com.famoco.kyctelcomr.mattel.ui.fragments.PhoneFragment // This import seems unused
@@ -415,8 +416,10 @@ class MainActivity : AppCompatActivity(), SMSListener {
 
         }
         if (matchingDevice != null) {
-            val deviceLat = matchingDevice.Latitude.replace(",", ".").toDouble()
-            val deviceLng = matchingDevice.Longtitude.replace(",", ".").toDouble()
+            //val deviceLat = matchingDevice.Latitude.replace(",", ".").toDouble()
+            //val deviceLng = matchingDevice.Longtitude.replace(",", ".").toDouble()
+            val deviceLat = matchingDevice.Latitude.toSafeDouble()
+            val deviceLng = matchingDevice.Longtitude.toSafeDouble()
 
             val distance = calculateDistanceInMeters(currentLat, currentLng, deviceLat, deviceLng)
 
